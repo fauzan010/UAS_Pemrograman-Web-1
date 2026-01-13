@@ -1,0 +1,9 @@
+# Cache
+*.log
+
+# Folder sensitif
+/vendor/
+/node_modules/
+
+# Config lokal
+.env
