@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" role="img" aria-label="WorldBike illustration">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="45%" r="70%">
+      <stop offset="0%" stop-color="#f3d9b1"/>
+      <stop offset="55%" stop-color="#d88a42" stop-opacity="0.75"/>
+      <stop offset="100%" stop-color="#6a3415" stop-opacity="0.9"/>
+    </radialGradient>
+    <linearGradient id="frame" x1="0%" x2="100%" y1="0%" y2="0%">
+      <stop offset="0%" stop-color="#f7a84f"/>
+      <stop offset="100%" stop-color="#d46a19"/>
+    </linearGradient>
+  </defs>
+  <circle cx="160" cy="160" r="150" fill="url(#bg)" stroke="#f3e6d6" stroke-width="10"/>
+  <path d="M55 210c0-28 23-51 51-51s51 23 51 51-23 51-51 51-51-23-51-51z" fill="#f7f2ec" stroke="#4f2a12" stroke-width="10"/>
+  <path d="M163 210c0-28 23-51 51-51s51 23 51 51-23 51-51 51-51-23-51-51z" fill="#f7f2ec" stroke="#4f2a12" stroke-width="10"/>
+  <circle cx="106" cy="210" r="15" fill="#4f2a12"/>
+  <circle cx="214" cy="210" r="15" fill="#4f2a12"/>
+  <path d="M110 140 150 110 210 128 180 168" fill="none" stroke="url(#frame)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M106 210 180 168" fill="none" stroke="url(#frame)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M214 210 180 168" fill="none" stroke="url(#frame)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M150 110 170 70" fill="none" stroke="url(#frame)" stroke-width="12" stroke-linecap="round"/>
+  <path d="M170 70h50" fill="none" stroke="#f7a84f" stroke-width="12" stroke-linecap="round"/>
+  <rect x="206" y="64" width="20" height="12" rx="6" fill="#f7f2ec"/>
+  <rect x="90" y="128" width="32" height="12" rx="6" fill="#f7a84f"/>
+  <circle cx="150" cy="110" r="9" fill="#4f2a12"/>
+  <path d="M60 224c20 10 46 14 74 14 56 0 104-13 126-32" fill="none" stroke="#f3e6d6" stroke-width="10" stroke-linecap="round"/>
+</svg>

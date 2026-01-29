@@ -9,6 +9,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nama = $_POST['nama'];
 
     mysqli_query($conn, "INSERT INTO categories (nama_kategori) VALUES ('$nama')");
+    if (function_exists('log_admin_action')) {
+        log_admin_action($conn, "Tambah kategori: $nama");
+    }
     header("Location: kategori.php");
     exit;
 }
@@ -18,6 +21,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <title>Tambah Kategori</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+          crossorigin="anonymous">
     <link rel="stylesheet" href="../assets/css/style.css">
     <style>
     body {
@@ -67,6 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         background: #3498db;
         color: #fff;
     }
+    .navbar ul li.nav-right { margin-left: auto; }
     .btn-logout {
         background: #e74c3c;
         color: #fff;
@@ -176,7 +185,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <li><a href="dashboard.php">Dashboard</a></li>
         <li><a href="produk.php">Produk</a></li>
         <li><a href="kategori.php" class="active">Kategori</a></li>
-        <li><a href="../auth/logout.php" class="btn-logout">Logout</a></li>
+        <li><a href="orders.php">Orders</a></li>
+        <li><a href="users.php">Users</a></li>
+        <li class="nav-right"><a href="../auth/logout.php" class="btn-logout">Logout</a></li>
     </ul>
 </nav>
 <div class="dashboard-container">
@@ -192,5 +203,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <footer class="footer">
     @Copyright by 23552011029_Fauzan Rizkika Kurnia_TIF RP 23 CNS B_UASWEB1
 </footer>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
 </body>
 </html>

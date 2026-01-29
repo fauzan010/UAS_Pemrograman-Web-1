@@ -20,5 +20,8 @@ if ($data['total'] > 0) {
 }
 
 mysqli_query($conn, "DELETE FROM categories WHERE id=$id");
+if (function_exists('log_admin_action')) {
+    log_admin_action($conn, "Hapus kategori ID $id");
+}
 header("Location: kategori.php");
 exit;

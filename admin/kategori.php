@@ -12,26 +12,30 @@ $categories = mysqli_query($conn, "SELECT * FROM categories");
 <head>
     <meta charset="UTF-8">
     <title>Kelola Kategori</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+          crossorigin="anonymous">
     <link rel="stylesheet" href="../assets/css/style.css">
     <style>
     body {
-        background: linear-gradient(120deg, #e0eafc 0%, #cfdef3 100%);
+        background: #eef5ff;
         min-height: 100vh;
         margin: 0;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     .navbar {
         width: 100%;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 18px 32px;
+        padding: 16px 28px;
         background: #fff;
         box-shadow: 0 2px 18px rgba(44,62,80,0.07);
         position: sticky;
         top: 0;
-        left: 0;
-        right: 0;
-        z-index: 100;
+        z-index: 120;
     }
     .navbar .logo {
         font-size: 1.7rem;
@@ -70,6 +74,7 @@ $categories = mysqli_query($conn, "SELECT * FROM categories");
         background: #3498db;
         color: #fff;
     }
+    .navbar ul li.nav-right { margin-left: auto; }
     .btn-logout {
         background: #e74c3c;
         color: #fff;
@@ -85,16 +90,31 @@ $categories = mysqli_query($conn, "SELECT * FROM categories");
     .btn-logout:hover {
         background: #c0392b;
     }
-    .dashboard-container {
-        max-width: 420px;
-        width: 100%;
-        margin: 48px auto 90px auto;
+    .page {
+        max-width: 1100px;
+        margin: 32px auto 120px auto;
         padding: 0 16px;
-        box-sizing: border-box;
-        background: #fff;
-        border-radius: 18px;
-        box-shadow: 0 8px 32px rgba(44,62,80,0.06);
     }
+    .panel {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 12px 32px rgba(44,62,80,0.10);
+        padding: 20px 18px;
+        border: 1px solid #e6eef7;
+    }
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 14px;
+    }
+    .page-title { margin: 0; color: #1b3a57; font-weight: 800; font-size: 1.6rem; }
+    .page-sub { margin: 0; color: #607286; font-size: 0.98rem; }
+    .actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .pill-btn { background: linear-gradient(135deg, #3498db, #217dbb); color: #fff; padding: 10px 14px; border-radius: 12px; text-decoration: none; font-weight: 700; box-shadow: 0 10px 24px rgba(52,152,219,0.25); }
+    .pill-btn:hover { opacity: 0.93; }
+    .badge-info { background: #eaf6fb; color: #217dbb; padding: 8px 12px; border-radius: 999px; font-weight: 700; }
     /* Tombol aksi kategori */
     .aksi-btn-group {
         display: flex;
@@ -104,27 +124,53 @@ $categories = mysqli_query($conn, "SELECT * FROM categories");
     .btn-sm {
         margin-right: 0;
     }
-    .table-wrapper {
-        background: #f8fafc;
-        border-radius: 12px;
-        padding: 8px;
-        box-shadow: 0 8px 20px rgba(52,152,219,0.07);
-        overflow-x: auto;
-    }
+    .table-wrapper { overflow-x: auto; }
     .table {
         width: 100%;
-        min-width: 320px;
-        border-collapse: collapse;
+        min-width: 380px;
+        border-collapse: separate;
+        border-spacing: 0;
     }
-    .table th, .table td {
-        padding: 12px;
-        border-bottom: 1px solid #eee;
+    .table thead tr th {
+        background: #f1f6ff;
+        color: #1f3b57;
+        font-weight: 800;
+        font-size: 0.98rem;
+        border-bottom: 1px solid #dde7f5;
+        padding: 12px 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
     }
-    .table th {
-        text-align: left;
-        color: #217dbb;
+    .table tbody tr td {
+        padding: 12px 14px;
+        border-bottom: 1px solid #eef2f7;
+        background: #fff;
+        vertical-align: middle;
+    }
+    .table tbody tr:hover td { background: #f6faff; }
+    .aksi-btn-group {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+    .btn-sm {
+        background: #3498db;
+        color: #fff;
+        padding: 7px 14px;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        text-decoration: none;
+        border: none;
+        transition: transform 0.15s, background 0.2s;
         font-weight: 600;
+        cursor: pointer;
+        margin-right: 0;
+        outline: none;
+        display: inline-block;
     }
+    .btn-sm:hover, .btn-sm:focus { background: #217dbb; color: #fff; transform: translateY(-1px); }
+    .btn-sm.danger { background: #e74c3c; }
+    .btn-sm.danger:hover, .btn-sm.danger:focus { background: #c0392b; color: #fff; }
     .footer {
         background: #fff;
         color: #030000;
@@ -144,65 +190,63 @@ $categories = mysqli_query($conn, "SELECT * FROM categories");
 <nav class="navbar">
     <div class="logo">WorldBike Admin</div>
     <ul>
-        <li><a href="../auth/logout.php" class="btn-logout">Logout</a></li>
+        <li><a href="dashboard.php">Dashboard</a></li>
+        <li><a href="produk.php">Produk</a></li>
+        <li><a href="kategori.php" class="active">Kategori</a></li>
+        <li><a href="orders.php">Pemesanan</a></li>
+        <li><a href="users.php">Pengguna</a></li>
+        <li class="nav-right"><a href="../auth/logout.php" class="btn-logout">Logout</a></li>
     </ul>
 </nav>
-<div class="dashboard-container">
-    <header class="dashboard-header">
-        <h1 style="color:#3498db; font-size:1.5rem; font-weight:700; text-align:center; margin-bottom:24px; width:100%;">Kelola Kategori</h1>
-    </header>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
-        <a href="tambah_kategori.php" class="btn">+ Tambah Kategori</a>
-        <a href="dashboard.php" class="btn" style="background:#217dbb;">Kembali ke Dashboard</a>
+<div class="page">
+    <div class="panel" style="margin-bottom:16px;">
+        <div class="page-header">
+            <div>
+                <p class="eyebrow" style="margin:0; text-transform:uppercase; letter-spacing:0.08em; color:#607286; font-weight:800; font-size:0.82rem;">Data</p>
+                <h1 class="page-title">Kelola Kategori</h1>
+                <p class="page-sub">Buat, ubah, dan hapus kategori produk dengan cepat.</p>
+            </div>
+            <div class="actions">
+                <span class="badge-info">Total: <?= mysqli_num_rows($categories) ?></span>
+                <a href="tambah_kategori.php" class="pill-btn">+ Tambah Kategori</a>
+            </div>
+        </div>
     </div>
-    <div class="table-wrapper">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Nama Kategori</th>
-                    <th>Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php while($c = mysqli_fetch_assoc($categories)): ?>
-                <tr>
-                    <td><?= htmlspecialchars($c['nama_kategori']) ?></td>
-                    <td>
-                        <div class="aksi-btn-group">
-                            <a href="edit_kategori.php?id=<?= $c['id'] ?>" class="btn-sm">Edit</a>
-                            <a href="hapus_kategori.php?id=<?= $c['id'] ?>" 
-                               class="btn-sm danger"
-                               onclick="return confirm('Hapus kategori ini?')">
-                               Hapus
-                            </a>
-                        </div>
-                    </td>
-                </tr>
-                <?php endwhile; ?>
-            </tbody>
-        </table>
+
+    <div class="panel">
+        <div class="table-wrapper">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th style="width:70%">Nama Kategori</th>
+                        <th style="width:30%">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php mysqli_data_seek($categories, 0); while($c = mysqli_fetch_assoc($categories)): ?>
+                    <tr>
+                        <td><?= htmlspecialchars($c['nama_kategori']) ?></td>
+                        <td>
+                            <div class="aksi-btn-group">
+                                <a href="edit_kategori.php?id=<?= $c['id'] ?>" class="btn-sm">Edit</a>
+                                <a href="hapus_kategori.php?id=<?= $c['id'] ?>" 
+                                   class="btn-sm danger"
+                                   onclick="return confirm('Hapus kategori ini?')">
+                                   Hapus
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    <?php endwhile; ?>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-    var menuToggle = document.getElementById('menuToggle');
-    var navbarMenu = document.getElementById('navbarMenu');
-    menuToggle.addEventListener('click', function(e) {
-        e.stopPropagation();
-        navbarMenu.classList.toggle('show');
-    });
-    navbarMenu.querySelectorAll('a').forEach(function(link) {
-        link.addEventListener('click', function() {
-            if (window.innerWidth <= 600) navbarMenu.classList.remove('show');
-        });
-    });
-    document.addEventListener('click', function(e) {
-        if (window.innerWidth <= 600 && !navbarMenu.contains(e.target) && e.target !== menuToggle) {
-            navbarMenu.classList.remove('show');
-        }
-    });
-});
-</script>
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
 <!-- Footer -->
 <footer class="footer">
     @Copyright by 23552011029_Fauzan Rizkika Kurnia_TIF RP 23 CNS B_UASWEB1

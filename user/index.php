@@ -1,10 +1,17 @@
 <?php
+session_start();
 include "../config/database.php";
 
-$logged_in = isset($_COOKIE['user_id']);
+// Sinkronkan session dari cookie jika ada
+if (!isset($_SESSION['user_id']) && isset($_COOKIE['user_id'])) {
+    $_SESSION['user_id'] = $_COOKIE['user_id'];
+    $_SESSION['role'] = $_COOKIE['role'] ?? 'user';
+}
+
+$logged_in = isset($_SESSION['user_id']);
 $user_name = '';
 if ($logged_in) {
-    $uid = intval($_COOKIE['user_id']);
+    $uid = intval($_SESSION['user_id']);
     $q = mysqli_query($conn, "SELECT nama FROM users WHERE id=$uid");
     $u = mysqli_fetch_assoc($q);
     $user_name = $u ? $u['nama'] : '';
@@ -13,11 +20,44 @@ if ($logged_in) {
 /* Ambil kategori */
 $categories = mysqli_query($conn, "SELECT * FROM categories");
 
-/* Filter kategori */
-$where = "";
-if (isset($_GET['kategori']) && $_GET['kategori'] != "") {
-    $id = $_GET['kategori'];
-    $where = "WHERE products.category_id = $id";
+/* Filter dinamis */
+$conditions = [];
+if (isset($_GET['kategori']) && $_GET['kategori'] !== "") {
+    $id = intval($_GET['kategori']);
+    $conditions[] = "products.category_id = $id";
+}
+if (isset($_GET['q']) && trim($_GET['q']) !== '') {
+    $search = mysqli_real_escape_string($conn, trim($_GET['q']));
+    $conditions[] = "products.nama_produk LIKE '%$search%'";
+}
+if (isset($_GET['min']) && $_GET['min'] !== '' && is_numeric($_GET['min'])) {
+    $min = intval($_GET['min']);
+    $conditions[] = "products.harga >= $min";
+}
+if (isset($_GET['max']) && $_GET['max'] !== '' && is_numeric($_GET['max'])) {
+    $max = intval($_GET['max']);
+    $conditions[] = "products.harga <= $max";
+}
+$where = '';
+if (count($conditions) > 0) {
+    $where = 'WHERE ' . implode(' AND ', $conditions);
+}
+
+$orderBy = 'ORDER BY products.id DESC';
+if (isset($_GET['sort'])) {
+    switch ($_GET['sort']) {
+        case 'harga_asc':
+            $orderBy = 'ORDER BY products.harga ASC';
+            break;
+        case 'harga_desc':
+            $orderBy = 'ORDER BY products.harga DESC';
+            break;
+        case 'stok':
+            $orderBy = 'ORDER BY products.stok DESC';
+            break;
+        default:
+            $orderBy = 'ORDER BY products.id DESC';
+    }
 }
 
 /* Ambil produk */
@@ -26,7 +66,12 @@ $products = mysqli_query($conn, "
     FROM products
     LEFT JOIN categories ON products.category_id = categories.id
     $where
+    $orderBy
 ");
+$product_count = $products ? mysqli_num_rows($products) : 0;
+if ($products) {
+    mysqli_data_seek($products, 0); // pastikan pointer di awal untuk loop
+}
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -34,6 +79,11 @@ $products = mysqli_query($conn, "
     <meta charset="UTF-8">
     <title>WorldBike - Marketplace Sepeda</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+          crossorigin="anonymous">
     <link rel="stylesheet" href="../assets/css/style.css">
     <style>
     body {
@@ -92,6 +142,43 @@ $products = mysqli_query($conn, "
         display: block;
         transition: background 0.2s, color 0.2s;
         vertical-align: middle;
+        text-decoration: none;
+    }
+    .navbar ul li a.cart-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 14px;
+        justify-content: center;
+        min-width: 110px;
+    }
+    .navbar ul li.nav-right {
+        margin-left: auto;
+    }
+    .navbar ul li a.profile-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 14px;
+        background: #eaf6fb;
+        color: #3498db;
+        font-weight: 600;
+    }
+    .cart-badge {
+        position: static;
+        background: #eef2f7;
+        color: #2c3e50;
+        border-radius: 999px;
+        padding: 2px 8px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        box-shadow: none;
+        line-height: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 20px;
+        height: 20px;
     }
     .navbar ul li span.user-profile {
         color: #3498db;
@@ -117,6 +204,46 @@ $products = mysqli_query($conn, "
         background: #3498db;
         color: #fff;
     }
+    .profile-menu { position: relative; }
+    .profile-trigger {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 14px;
+        background: #eaf6fb;
+        color: #3498db;
+        font-weight: 600;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background 0.2s, color 0.2s;
+    }
+    .profile-trigger:hover { background: #d9edf9; }
+    .profile-dropdown {
+        position: absolute;
+        right: 0;
+        top: 110%;
+        background: #fff;
+        border: 1px solid #e8edf3;
+        border-radius: 10px;
+        box-shadow: 0 10px 24px rgba(44,62,80,0.12);
+        padding: 6px 0;
+        min-width: 180px;
+        display: none;
+        z-index: 20;
+    }
+    .profile-dropdown.show { display: block; }
+    .profile-dropdown a {
+        display: block;
+        padding: 10px 14px;
+        color: #1f2d3d;
+        text-decoration: none;
+        font-weight: 600;
+        transition: background 0.15s, color 0.15s;
+    }
+    .profile-dropdown a:hover { background: #f1f6ff; color: #217dbb; }
+    .profile-dropdown a.logout { color: #b91c1c; }
+    .profile-dropdown a.logout:hover { background: #fff1f2; }
     .marketplace-hero {
         display: flex;
         flex-direction: column;
@@ -144,25 +271,86 @@ $products = mysqli_query($conn, "
         animation: fadeIn 1.5s;
     }
     .marketplace-filter {
-        margin: 0 auto 30px auto;
-        max-width: 400px;
+        margin: 0 auto 24px auto;
+        max-width: 1000px;
         text-align: center;
         animation: fadeInUp 1.2s;
     }
-    .marketplace-filter select {
-        width: 100%;
-        padding: 12px 14px;
-        border-radius: 8px;
-        border: 1px solid #ddd;
-        font-size: 1.05rem;
-        margin-top: 10px;
-        margin-bottom: 0;
-        background: #f8fafc;
-        transition: border 0.2s;
+    .filter-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 12px;
+        align-items: center;
     }
-    .marketplace-filter select:focus {
+    @media (max-width: 992px) { .filter-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 640px) { .filter-grid { grid-template-columns: 1fr; } }
+    .filter-grid .field {
+        background: #fff;
+        border-radius: 10px;
+        padding: 10px 12px 6px;
+        box-shadow: 0 6px 18px rgba(44,62,80,0.07);
+        border: 1px solid #eef3f7;
+        text-align: left;
+    }
+    .filter-grid label {
+        display: block;
+        font-size: 0.9rem;
+        color: #6c7a89;
+        margin-bottom: 6px;
+        font-weight: 600;
+    }
+    .filter-grid input, .filter-grid select {
+        width: 100%;
+        padding: 10px 12px;
+        border-radius: 8px;
+        border: 1px solid #dce4ec;
+        font-size: 1rem;
+        background: #f8fafc;
+        transition: border 0.2s, box-shadow 0.2s;
+    }
+    .filter-grid input:focus, .filter-grid select:focus {
         border: 1.5px solid #3498db;
         outline: none;
+        box-shadow: 0 0 0 3px rgba(52,152,219,0.15);
+    }
+    .filter-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        margin-top: 14px;
+    }
+    .btn-filter {
+        padding: 11px 18px;
+        border: none;
+        border-radius: 10px;
+        font-weight: 700;
+        cursor: pointer;
+        background: linear-gradient(135deg, #3498db, #217dbb);
+        color: #fff;
+        box-shadow: 0 8px 24px rgba(52,152,219,0.2);
+        transition: transform 0.15s, box-shadow 0.2s;
+    }
+    .btn-filter:hover { transform: translateY(-1px); box-shadow: 0 12px 28px rgba(52,152,219,0.25); }
+    .btn-reset {
+        padding: 11px 16px;
+        border-radius: 10px;
+        border: 1px solid #dce4ec;
+        background: #fff;
+        color: #2c3e50;
+        font-weight: 600;
+        cursor: pointer;
+        transition: border 0.2s, color 0.2s;
+    }
+    .btn-reset:hover { border-color: #3498db; color: #217dbb; }
+    .summary-chip {
+        display: inline-block;
+        margin-top: 12px;
+        background: #eaf6fb;
+        color: #217dbb;
+        padding: 8px 14px;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: 0.98rem;
     }
     .dashboard-menu {
         display: grid;
@@ -175,18 +363,19 @@ $products = mysqli_query($conn, "
     }
     .menu-card {
         background: #fff;
-        border-radius: 14px;
-        padding: 18px 16px 16px 16px;
-        box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        border-radius: 16px;
+        padding: 18px 16px 18px 16px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
         transition: transform 0.3s, box-shadow 0.3s;
         display: flex;
         flex-direction: column;
-        align-items: center;
-        min-height: 420px;
+        align-items: stretch;
+        min-height: 440px;
         position: relative;
         opacity: 0;
         transform: translateY(40px);
         transition: all 0.7s;
+        overflow: hidden;
     }
     .menu-card.visible {
         opacity: 1;
@@ -198,32 +387,99 @@ $products = mysqli_query($conn, "
     }
     .menu-card img {
         width: 100%;
-        max-width: 210px;
-        height: 160px;
+        max-width: 100%;
+        height: 180px;
         object-fit: cover;
-        border-radius: 10px;
-        margin-bottom: 18px;
+        border-radius: 12px;
+        margin-bottom: 14px;
         background: #eaf6fb;
-        box-shadow: 0 2px 8px rgba(52,152,219,0.08);
+        box-shadow: 0 3px 10px rgba(52,152,219,0.08);
     }
     .menu-card h3 {
-        font-size: 1.18rem;
-        color: #3498db;
-        margin-bottom: 8px;
-        font-weight: 700;
-        text-align: center;
+        font-size: 1.16rem;
+        color: #1b3a57;
+        margin-bottom: 6px;
+        font-weight: 800;
+        text-align: left;
     }
     .menu-card p {
-        font-size: 1rem;
-        color: #444;
+        font-size: 0.98rem;
+        color: #4a5560;
         margin-bottom: 6px;
-        text-align: center;
+        text-align: left;
     }
     .menu-card .stok {
-        font-size: 0.98rem;
-        color: #888;
+        font-size: 0.95rem;
+        color: #556;
         margin-bottom: 0;
     }
+    .price-pill {
+        display: inline-block;
+        padding: 10px 12px;
+        background: #eaf6fb;
+        color: #0f6abf;
+        border-radius: 12px;
+        font-weight: 800;
+        letter-spacing: 0.3px;
+        margin-bottom: 6px;
+        font-size: 1rem;
+    }
+    .category-tag {
+        display: inline-block;
+        background: #fef4e6;
+        color: #d35400;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        margin-bottom: 8px;
+    }
+    .stock-badge {
+        display: inline-block;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        margin-right: 6px;
+    }
+    .stock-ready { background: #e8f8f0; color: #1e8a4b; }
+    .stock-low { background: #fff4e5; color: #c77400; }
+    .stock-out { background: #ffecec; color: #c0392b; }
+    .card-footer-actions {
+        margin-top: auto;
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        align-items: center;
+    }
+    .btn-detail {
+        flex: 1;
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid #dce4ec;
+        background: #fff;
+        color: #1b3a57;
+        font-weight: 700;
+        text-align: center;
+        text-decoration: none;
+        transition: border 0.2s, color 0.2s;
+    }
+    .btn-detail:hover { border-color: #3498db; color: #217dbb; }
+    .btn-cart {
+        flex: 1;
+        padding: 10px 12px;
+        border: none;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #2ecc71, #27ae60);
+        color: #fff;
+        font-weight: 800;
+        cursor: pointer;
+        text-decoration: none;
+        text-align: center;
+        box-shadow: 0 8px 20px rgba(46,204,113,0.25);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .btn-cart:hover { transform: translateY(-1px); box-shadow: 0 12px 28px rgba(46,204,113,0.3); }
     .no-product {
         text-align: center;
         color: #888;
@@ -315,6 +571,9 @@ $products = mysqli_query($conn, "
             padding: 12px 18px;
             font-size: 1.08rem;
         }
+        .navbar ul li.nav-right {
+            margin-left: 0;
+        }
         .marketplace-title {
             font-size: 1.1rem;
         }
@@ -342,10 +601,8 @@ $products = mysqli_query($conn, "
         .marketplace-hero {
             padding: 24px 2vw 16px;
         }
-        .marketplace-filter select {
-            font-size: 0.98rem;
-            padding: 10px 10px;
-        }
+        .filter-grid { grid-template-columns: 1fr; }
+        .filter-grid input, .filter-grid select { font-size: 0.98rem; padding: 10px 10px; }
     }
     </style>
 </head>
@@ -358,15 +615,17 @@ $products = mysqli_query($conn, "
     <ul id="navbarMenu">
         <li><a href="../index.php">Home</a></li>
         <li><a href="#" class="active">Marketplace</a></li>
-        <?php if (!$logged_in): ?>
-            <li><a href="../auth/login.php" class="btn" style="margin-left:16px;">Login</a></li>
+        <li><a href="cart.php" class="cart-link">Keranjang</a></li>
+        <?php if ($logged_in): ?>
+            <li class="nav-right profile-menu">
+                <button class="profile-trigger" id="profileMenuBtn">Hi, <?= htmlspecialchars($user_name ?: 'Pengguna') ?> ▾</button>
+                <div class="profile-dropdown" id="profileDropdown">
+                    <a href="profile.php">Kunjungi Profil</a>
+                    <a href="../auth/logout.php" class="logout">Logout</a>
+                </div>
+            </li>
         <?php else: ?>
-            <li>
-                <span class="user-profile"><span style="font-size:1.2em;">👤</span><?= htmlspecialchars($user_name) ?></span>
-            </li>
-            <li>
-                <a href="../auth/logout.php" style="color:#2c3e50;font-weight:500;padding:6px 14px;border-radius:6px;text-decoration:none;">Logout</a>
-            </li>
+            <li class="nav-right"><a href="../auth/login.php?redirect=<?= urlencode($_SERVER['REQUEST_URI']) ?>" class="login-link">Login</a></li>
         <?php endif; ?>
     </ul>
 </nav>
@@ -376,20 +635,50 @@ $products = mysqli_query($conn, "
     <div class="marketplace-title">Marketplace Sepeda & Aksesoris</div>
     <div class="marketplace-tagline">
         Temukan berbagai pilihan sepeda dan aksesoris terbaik untuk kebutuhanmu.<br>
-        Pilih kategori untuk filter produk sesuai keinginan.
+        Gunakan pencarian, harga, dan urutan untuk menemukan produk lebih cepat.
     </div>
     <form method="GET" class="marketplace-filter">
-        <select name="kategori" onchange="this.form.submit()">
-            <option value="">Semua Kategori</option>
-            <?php
-            mysqli_data_seek($categories, 0);
-            while($c = mysqli_fetch_assoc($categories)): ?>
-                <option value="<?= $c['id'] ?>"
-                    <?= (isset($_GET['kategori']) && $_GET['kategori'] == $c['id']) ? 'selected' : '' ?>>
-                    <?= htmlspecialchars($c['nama_kategori']) ?>
-                </option>
-            <?php endwhile; ?>
-        </select>
+        <div class="filter-grid">
+            <div class="field">
+                <label>Cari produk</label>
+                <input type="text" name="q" placeholder="Cari nama sepeda/aksesoris" value="<?= isset($_GET['q']) ? htmlspecialchars($_GET['q']) : '' ?>">
+            </div>
+            <div class="field">
+                <label>Kategori</label>
+                <select name="kategori">
+                    <option value="">Semua Kategori</option>
+                    <?php
+                    mysqli_data_seek($categories, 0);
+                    while($c = mysqli_fetch_assoc($categories)): ?>
+                        <option value="<?= $c['id'] ?>" <?= (isset($_GET['kategori']) && $_GET['kategori'] == $c['id']) ? 'selected' : '' ?>>
+                            <?= htmlspecialchars($c['nama_kategori']) ?>
+                        </option>
+                    <?php endwhile; ?>
+                </select>
+            </div>
+            <div class="field">
+                <label>Harga minimum</label>
+                <input type="number" name="min" min="0" placeholder="0" value="<?= isset($_GET['min']) ? htmlspecialchars($_GET['min']) : '' ?>">
+            </div>
+            <div class="field">
+                <label>Harga maksimum</label>
+                <input type="number" name="max" min="0" placeholder="20000000" value="<?= isset($_GET['max']) ? htmlspecialchars($_GET['max']) : '' ?>">
+            </div>
+            <div class="field">
+                <label>Urutkan</label>
+                <select name="sort">
+                    <option value="baru" <?= (!isset($_GET['sort']) || $_GET['sort'] === 'baru') ? 'selected' : '' ?>>Terbaru</option>
+                    <option value="harga_asc" <?= (isset($_GET['sort']) && $_GET['sort'] === 'harga_asc') ? 'selected' : '' ?>>Harga terendah</option>
+                    <option value="harga_desc" <?= (isset($_GET['sort']) && $_GET['sort'] === 'harga_desc') ? 'selected' : '' ?>>Harga tertinggi</option>
+                    <option value="stok" <?= (isset($_GET['sort']) && $_GET['sort'] === 'stok') ? 'selected' : '' ?>>Stok terbanyak</option>
+                </select>
+            </div>
+        </div>
+        <div class="filter-actions">
+            <button type="submit" class="btn-filter">Terapkan Filter</button>
+            <a class="btn-reset" href="index.php">Reset</a>
+        </div>
+        <div class="summary-chip">Menampilkan <?= $product_count ?> produk</div>
     </form>
 </section>
 
@@ -397,7 +686,11 @@ $products = mysqli_query($conn, "
 <div class="dashboard-menu">
     <?php if(mysqli_num_rows($products) > 0): ?>
         <?php while($p = mysqli_fetch_assoc($products)): ?>
-            <a href="detail.php?id=<?= $p['id'] ?>" style="text-decoration:none;">
+            <?php
+                $stok = intval($p['stok']);
+                $stockClass = $stok <= 0 ? 'stock-out' : ($stok <= 5 ? 'stock-low' : 'stock-ready');
+                $stockLabel = $stok <= 0 ? 'Stok habis' : ($stok <= 5 ? 'Stok menipis' : 'Ready stock');
+            ?>
             <div class="menu-card fadein">
                 <?php if(!empty($p['gambar'])): ?>
                     <img src="../assets/img/produk/<?= htmlspecialchars($p['gambar']) ?>"
@@ -405,17 +698,25 @@ $products = mysqli_query($conn, "
                 <?php else: ?>
                     <img src="../assets/img/no-image.png" alt="No Image">
                 <?php endif; ?>
+                <div class="category-tag"><?= htmlspecialchars($p['nama_kategori']) ?></div>
                 <h3><?= htmlspecialchars($p['nama_produk']) ?></h3>
-                <p><strong>Kategori:</strong> <?= htmlspecialchars($p['nama_kategori']) ?></p>
-                <p><strong>Harga:</strong> Rp <?= number_format($p['harga']) ?></p>
-                <p class="stok"><strong>Stok:</strong> <?= $p['stok'] ?></p>
+                <span class="price-pill">Rp <?= number_format($p['harga']) ?></span>
+                <p class="stok"><span class="stock-badge <?= $stockClass ?>"><?= $stockLabel ?></span>Stok: <?= $stok ?></p>
+                <p><strong>Deskripsi singkat:</strong> <?= isset($p['deskripsi']) ? htmlspecialchars(mb_strimwidth($p['deskripsi'], 0, 100, '...')) : 'Lihat detail produk untuk info lengkap.' ?></p>
+                <div class="card-footer-actions">
+                    <a class="btn-detail" href="detail.php?id=<?= $p['id'] ?>">Lihat Detail</a>
+                </div>
             </div>
-            </a>
         <?php endwhile; ?>
     <?php else: ?>
         <div class="no-product">Tidak ada produk.</div>
     <?php endif; ?>
 </div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -452,11 +753,25 @@ document.addEventListener("DOMContentLoaded", function() {
             navbarMenu.classList.remove('show');
         }
     });
+
+    var profileBtn = document.getElementById('profileMenuBtn');
+    var profileDropdown = document.getElementById('profileDropdown');
+    if (profileBtn && profileDropdown) {
+        profileBtn.addEventListener('click', function(ev) {
+            ev.stopPropagation();
+            profileDropdown.classList.toggle('show');
+        });
+        document.addEventListener('click', function(ev) {
+            if (!profileDropdown.contains(ev.target) && ev.target !== profileBtn) {
+                profileDropdown.classList.remove('show');
+            }
+        });
+    }
 });
 </script>
 <!-- Footer -->
-<footer class="footer" style="text-align:center; padding:18px 0; background:#f4f6f8; color:#030000; font-size:15px;">
-    @Copyright by 23552011029_Fauzan Rizkika Kurnia_TIF RP 23 CNS B_UASWEB1
-</footer>
+<<footer class="footer" style="text-align:center; padding:18px 0; background:#f4f6f8; color:#888; font-size:15px; position:relative; bottom:0; width:100%;">
+        @Copyright by 23552011029_Fauzan Rizkika Kurnia_TIF RP 23 CNS B_UASWEB1
+    </footer>
 </body>
 </html>

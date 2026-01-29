@@ -1,7 +1,8 @@
 <?php
-// Tidak perlu PHP logic di landing page ini
 session_start();
-$logged_in = isset($_COOKIE['user_id']);
+
+// pastikan selalu ada nilai default
+$logged_in = isset($_COOKIE['user_id']) ? true : false;
 $user_name = '';
 if ($logged_in) {
     include "config/database.php";
@@ -10,6 +11,7 @@ if ($logged_in) {
     $u = mysqli_fetch_assoc($q);
     $user_name = $u ? $u['nama'] : '';
 }
+$cart_count = !empty($_SESSION['cart']) ? array_sum(array_column($_SESSION['cart'], 'qty')) : 0;
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -17,6 +19,11 @@ if ($logged_in) {
     <meta charset="UTF-8">
     <title>WorldBike - Sepeda Masa Kini</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+          crossorigin="anonymous">
     <link rel="stylesheet" href="assets/css/style.css">
     <style>
     /* --- Tambahan style khusus landing page --- */
@@ -78,6 +85,42 @@ if ($logged_in) {
         vertical-align: middle;
         text-decoration: none; /* pastikan tidak ada underline */
     }
+    .navbar ul li a.cart-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 14px;
+        justify-content: center;
+        min-width: 110px;
+    }
+    .navbar ul li.nav-right {
+        margin-left: auto;
+    }
+    .navbar ul li a.profile-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 14px;
+        background: #eaf6fb;
+        color: #3498db;
+        font-weight: 600;
+    }
+    .cart-badge {
+        position: static;
+        background: #eef2f7;
+        color: #2c3e50;
+        border-radius: 999px;
+        padding: 2px 8px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        box-shadow: none;
+        line-height: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 20px;
+        height: 20px;
+    }
     .navbar ul li span.user-profile {
         color: #3498db;
         background: #eaf6fb;
@@ -98,6 +141,46 @@ if ($logged_in) {
         box-shadow: none;
         outline: none;
     }
+    .profile-menu { position: relative; }
+    .profile-trigger {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 14px;
+        background: #eaf6fb;
+        color: #3498db;
+        font-weight: 600;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background 0.2s, color 0.2s;
+    }
+    .profile-trigger:hover { background: #d9edf9; }
+    .profile-dropdown {
+        position: absolute;
+        right: 0;
+        top: 110%;
+        background: #fff;
+        border: 1px solid #e8edf3;
+        border-radius: 10px;
+        box-shadow: 0 10px 24px rgba(44,62,80,0.12);
+        padding: 6px 0;
+        min-width: 180px;
+        display: none;
+        z-index: 20;
+    }
+    .profile-dropdown.show { display: block; }
+    .profile-dropdown a {
+        display: block;
+        padding: 10px 14px;
+        color: #1f2d3d;
+        text-decoration: none;
+        font-weight: 600;
+        transition: background 0.15s, color 0.15s;
+    }
+    .profile-dropdown a:hover { background: #f1f6ff; color: #217dbb; }
+    .profile-dropdown a.logout { color: #b91c1c; }
+    .profile-dropdown a.logout:hover { background: #fff1f2; }
     @media (max-width: 600px) {
         html {
             font-size: 15px;
@@ -140,6 +223,9 @@ if ($logged_in) {
             width: 100%;
             padding: 12px 18px;
             font-size: 1.08rem;
+        }
+        .navbar ul li.nav-right {
+            margin-left: 0;
         }
         .hero-title {
             font-size: 1.3rem;
@@ -278,10 +364,25 @@ if ($logged_in) {
     }
     .kategori-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        grid-template-columns: repeat(5, 1fr); /* Selalu 5 kolom */
         gap: 28px;
-        max-width: 1000px;
+        max-width: 1200px; /* Lebarkan agar muat 5 card */
         margin: 0 auto;
+    }
+    @media (max-width: 1100px) {
+        .kategori-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+    @media (max-width: 700px) {
+        .kategori-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+    @media (max-width: 500px) {
+        .kategori-grid {
+            grid-template-columns: 1fr;
+        }
     }
     .kategori-card {
         background: #fff;
@@ -302,20 +403,6 @@ if ($logged_in) {
     .kategori-card:hover {
         transform: translateY(-8px) scale(1.04);
         box-shadow: 0 14px 32px rgba(52,152,219,0.13);
-    }
-    .kategori-card img {
-        width: 70px;
-        height: 70px;
-        object-fit: contain;
-        margin-bottom: 18px;
-        border-radius: 50%;
-        background: #eaf6fb;
-        padding: 10px;
-        box-shadow: 0 2px 8px rgba(52,152,219,0.08);
-        transition: background 0.2s;
-    }
-    .kategori-card:hover img {
-        background: #d0e8fa;
     }
     .kategori-card h4 {
         font-size: 1.15rem;
@@ -691,6 +778,160 @@ if ($logged_in) {
             font-size: 1.2rem;
         }
     }
+
+    /* Tips & FAQ */
+    .tips-section {
+        padding: 60px 7vw 40px;
+        background: #fff;
+        border-radius: 18px;
+        max-width: 1100px;
+        margin: 40px auto 0;
+        box-shadow: 0 8px 32px rgba(44,62,80,0.06);
+        opacity: 0;
+        transform: translateY(40px);
+        transition: all 0.7s;
+    }
+    .tips-section.visible { opacity: 1; transform: none; }
+    .tips-title {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 24px;
+        text-align: center;
+    }
+    .tips-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+    }
+    @media (max-width: 900px) {
+        .tips-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 600px) {
+        .tips-grid { grid-template-columns: 1fr; }
+    }
+    .tips-card {
+        background: linear-gradient(140deg, #eaf6fb 0%, #f8fafc 100%);
+        border-radius: 14px;
+        padding: 18px 18px 16px;
+        box-shadow: 0 6px 22px rgba(44,62,80,0.07);
+        border-left: 5px solid #3498db;
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+    }
+    .tips-card .tips-icon {
+        font-size: 1.6rem;
+        color: #3498db;
+        flex-shrink: 0;
+    }
+    .tips-card h4 {
+        margin: 0 0 6px 0;
+        color: #217dbb;
+        font-size: 1.05rem;
+        font-weight: 700;
+    }
+    .tips-card p {
+        margin: 0;
+        color: #444;
+        line-height: 1.5;
+        font-size: 0.98rem;
+    }
+    .checklist {
+        margin-top: 18px;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+    @media (max-width: 700px) {
+        .checklist { grid-template-columns: 1fr; }
+    }
+    .checklist-item {
+        background: #f8fafc;
+        border-radius: 10px;
+        padding: 12px 14px;
+        color: #217dbb;
+        font-weight: 600;
+        box-shadow: 0 2px 10px rgba(52,152,219,0.08);
+    }
+    .guide-section {
+        background: #f4f6f8;
+        border-radius: 18px;
+        padding: 60px 7vw 36px;
+        max-width: 1100px;
+        margin: 40px auto 0;
+        box-shadow: 0 8px 32px rgba(44,62,80,0.06);
+        opacity: 0;
+        transform: translateY(40px);
+        transition: all 0.7s;
+    }
+    .guide-section.visible { opacity: 1; transform: none; }
+    .guide-title {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 18px;
+        text-align: center;
+    }
+    .guide-desc {
+        text-align: center;
+        color: #444;
+        margin-bottom: 24px;
+        font-size: 1rem;
+    }
+    .guide-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+    }
+    @media (max-width: 900px) {
+        .guide-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 600px) {
+        .guide-grid { grid-template-columns: 1fr; }
+    }
+    .guide-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 16px 16px 14px;
+        box-shadow: 0 6px 18px rgba(44,62,80,0.07);
+        border-top: 4px solid #3498db;
+    }
+    .guide-card h4 {
+        color: #217dbb;
+        margin: 0 0 8px 0;
+        font-size: 1.05rem;
+        font-weight: 700;
+    }
+    .guide-card p { margin: 0; color: #444; line-height: 1.5; font-size: 0.97rem; }
+    .guide-badge {
+        display: inline-block;
+        background: #e0eafc;
+        color: #217dbb;
+        padding: 6px 10px;
+        border-radius: 20px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        margin-bottom: 6px;
+    }
+    .faq-section {
+        max-width: 900px;
+        margin: 40px auto 0;
+        padding: 0 7vw 20px;
+    }
+    .faq-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 10px;
+        text-align: center;
+    }
+    .faq-desc {
+        color: #444;
+        text-align: center;
+        margin-bottom: 18px;
+        font-size: 1rem;
+    }
     </style>
 </head>
 <body>
@@ -702,15 +943,17 @@ if ($logged_in) {
     <ul id="navbarMenu">
         <li><a href="#" class="active" id="nav-home">Home</a></li>
         <li><a href="user/index.php">Marketplace</a></li>
-        <?php if (!$logged_in): ?>
-            <li><a href="auth/login.php" class="btn" style="margin-left:16px;">Login</a></li>
+        <li><a href="user/cart.php" class="cart-link">Keranjang</a></li>
+        <?php if ($logged_in): ?>
+            <li class="nav-right profile-menu">
+                <button class="profile-trigger" id="profileMenuBtn">Hi, <?= htmlspecialchars($user_name ?: 'Pengguna') ?> ▾</button>
+                <div class="profile-dropdown" id="profileDropdown">
+                    <a href="user/profile.php">Kunjungi Profil</a>
+                    <a href="auth/logout.php" class="logout">Logout</a>
+                </div>
+            </li>
         <?php else: ?>
-            <li>
-                <span class="user-profile"><span style="font-size:1.2em;">👤</span><?= htmlspecialchars($user_name) ?></span>
-            </li>
-            <li>
-                <a href="auth/logout.php" style="color:#2c3e50;font-weight:500;padding:6px 14px;border-radius:6px;text-decoration:none;">Logout</a>
-            </li>
+            <li class="nav-right"><a href="auth/login.php" class="login-link">Login</a></li>
         <?php endif; ?>
     </ul>
 </nav>
@@ -739,7 +982,7 @@ if ($logged_in) {
         </div>
     </div>
     <div class="about-img">
-        <img src="assets/img/sepeda-about.png" alt="Tentang WorldBike" loading="lazy">
+        <img src="assets/img/sepeda-worldbike.svg" alt="Ilustrasi WorldBike" loading="lazy">
     </div>
 </section>
 
@@ -858,25 +1101,30 @@ if ($logged_in) {
 <section class="kategori-section" id="kategori">
     <div class="kategori-title">Kategori Unggulan</div>
     <div class="kategori-grid">
+        <!-- Sepeda Gunung -->
         <a href="user/index.php?kategori=1" class="kategori-card fadein" style="text-decoration:none;">
-            <img src="assets/img/mtb.png" alt="Sepeda Gunung" loading="lazy">
             <h4>Sepeda Gunung</h4>
             <p>Tangguh untuk segala medan, cocok untuk petualang sejati.</p>
         </a>
+        <!-- Sepeda Lipat -->
         <a href="user/index.php?kategori=2" class="kategori-card fadein" style="text-decoration:none;">
-            <img src="assets/img/lipat.png" alt="Sepeda Lipat" loading="lazy">
             <h4>Sepeda Lipat</h4>
             <p>Praktis, ringan, dan mudah dibawa ke mana saja.</p>
         </a>
-        <a href="user/index.php?kategori=3" class="kategori-card fadein" style="text-decoration:none;">
-            <img src="assets/img/anak.png" alt="Sepeda Anak" loading="lazy">
+        <!-- Sepeda Anak -->
+        <a href="user/index.php?kategori=4" class="kategori-card fadein" style="text-decoration:none;">
             <h4>Sepeda Anak</h4>
             <p>Aman dan menyenangkan untuk buah hati Anda.</p>
         </a>
-        <a href="user/index.php?kategori=4" class="kategori-card fadein" style="text-decoration:none;">
-            <img src="assets/img/aksesoris.png" alt="Aksesoris" loading="lazy">
+        <!-- Aksesoris -->
+        <a href="user/index.php?kategori=5" class="kategori-card fadein" style="text-decoration:none;">
             <h4>Aksesoris</h4>
             <p>Lengkapi gaya dan keamanan bersepeda Anda.</p>
+        </a>
+        <!-- Tambahan Sepeda Balap -->
+        <a href="user/index.php?kategori=3" class="kategori-card fadein" style="text-decoration:none;">
+            <h4>Sepeda Balap</h4>
+            <p>Jelajahi berbagai pilihan sepeda balap terbaik di WorldBike.</p>
         </a>
     </div>
 </section>
@@ -893,12 +1141,125 @@ if ($logged_in) {
     </div>
 </section>
 
+<!-- Tips & Perawatan Cepat -->
+<section class="tips-section fadein" id="tips">
+    <div class="tips-title">Tips Perawatan Cepat</div>
+    <div class="tips-grid">
+        <div class="tips-card">
+            <div class="tips-icon">🧽</div>
+            <div>
+                <h4>Bersihkan Rutin</h4>
+                <p>Cuci rangka, rantai, dan gear seminggu sekali. Keringkan lalu beri pelumas tipis agar drivetrain halus.</p>
+            </div>
+        </div>
+        <div class="tips-card">
+            <div class="tips-icon">⏱</div>
+            <div>
+                <h4>Cek Tekanan Ban</h4>
+                <p>Pastikan ban berada di PSI rekomendasi. Ban terlalu kempis bikin berat, terlalu keras mudah bocor.</p>
+            </div>
+        </div>
+        <div class="tips-card">
+            <div class="tips-icon">🔧</div>
+            <div>
+                <h4>Rem & Drivetrain</h4>
+                <p>Periksa kampas rem, setel derailleur jika ada loncatan gigi, dan ganti rantai tiap 2.000–3.000 km.</p>
+            </div>
+        </div>
+    </div>
+    <div class="checklist" style="margin-top:22px;">
+        <div class="checklist-item">✔ Lampu depan & belakang menyala</div>
+        <div class="checklist-item">✔ Baut stem, saddle, dan roda kencang</div>
+        <div class="checklist-item">✔ Bawa multitool, ban dalam, dan pompa mini</div>
+        <div class="checklist-item">✔ Atur saddle setinggi tulang pinggul</div>
+    </div>
+</section>
+
+<!-- Panduan Ukuran & Pemilihan -->
+<section class="guide-section fadein">
+    <div class="guide-title">Panduan Singkat Memilih Sepeda</div>
+    <div class="guide-desc">Mulai dari ukuran frame sampai tipe sepeda sesuai kebutuhan harian atau olahraga.</div>
+    <div class="guide-grid">
+        <div class="guide-card">
+            <div class="guide-badge">Ukuran Frame</div>
+            <h4>Tinggi 150–165 cm</h4>
+            <p>Pilih frame 14–16 inch (S). Cocok untuk kota, sepeda lipat, atau MTB entry-level.</p>
+        </div>
+        <div class="guide-card">
+            <div class="guide-badge">Ukuran Frame</div>
+            <h4>Tinggi 166–178 cm</h4>
+            <p>Frame 16–18 inch (M). Seimbang untuk road bike, hybrid, dan MTB trail ringan.</p>
+        </div>
+        <div class="guide-card">
+            <div class="guide-badge">Ukuran Frame</div>
+            <h4>Tinggi 179–190 cm</h4>
+            <p>Frame 18–20 inch (L). Pilihan tepat untuk perjalanan jauh atau medan menantang.</p>
+        </div>
+        <div class="guide-card">
+            <div class="guide-badge">Gunakan Untuk</div>
+            <h4>Kota & Komuter</h4>
+            <p>Sepeda lipat atau hybrid: posisi nyaman, mudah dibawa, irit perawatan.</p>
+        </div>
+        <div class="guide-card">
+            <div class="guide-badge">Gunakan Untuk</div>
+            <h4>Olahraga & Kecepatan</h4>
+            <p>Road bike: rangka ringan, ban slick, cocok untuk latihan jarak jauh.</p>
+        </div>
+        <div class="guide-card">
+            <div class="guide-badge">Gunakan Untuk</div>
+            <h4>Medan Campuran</h4>
+            <p>MTB atau gravel: ban lebih tebal, suspensi atau fork rigid sesuai preferensi.</p>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ Singkat -->
+<section class="faq-section fadein">
+    <div class="faq-title">FAQ Seputar Bersepeda</div>
+    <div class="faq-desc">Jawaban cepat untuk pertanyaan yang sering diajukan.</div>
+    <div class="accordion" id="faqAccordion">
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="faqOne">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faqCollapseOne" aria-expanded="true" aria-controls="faqCollapseOne">
+                    Seberapa sering harus servis sepeda?
+                </button>
+            </h2>
+            <div id="faqCollapseOne" class="accordion-collapse collapse show" aria-labelledby="faqOne" data-bs-parent="#faqAccordion">
+                <div class="accordion-body">Servis ringan (bersih-lumas rantai, cek rem, cek baut) sebulan sekali. Servis penuh dan pengecekan bearing tiap 6 bulan atau 2.000 km.</div>
+            </div>
+        </div>
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="faqTwo">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faqCollapseTwo" aria-expanded="false" aria-controls="faqCollapseTwo">
+                    Ban tubeless atau ban dalam?
+                </button>
+            </h2>
+            <div id="faqCollapseTwo" class="accordion-collapse collapse" aria-labelledby="faqTwo" data-bs-parent="#faqAccordion">
+                <div class="accordion-body">Tubeless lebih tahan bocor kecil dan nyaman di tekanan rendah, cocok untuk MTB/gravel. Ban dalam lebih sederhana dan murah, cocok untuk komuter harian.</div>
+            </div>
+        </div>
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="faqThree">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faqCollapseThree" aria-expanded="false" aria-controls="faqCollapseThree">
+                    Helm yang aman itu yang seperti apa?
+                </button>
+            </h2>
+            <div id="faqCollapseThree" class="accordion-collapse collapse" aria-labelledby="faqThree" data-bs-parent="#faqAccordion">
+                <div class="accordion-body">Pastikan bersertifikasi (CPSC/EN), pas di kepala, strap rapat, dan diganti setelah benturan keras atau 3–5 tahun pemakaian.</div>
+            </div>
+        </div>
+    </div>
+</section>
+
     <!-- Footer -->
     <footer class="footer" style="text-align:center; padding:18px 0; background:#f4f6f8; color:#888; font-size:15px; position:relative; bottom:0; width:100%;">
         @Copyright by 23552011029_Fauzan Rizkika Kurnia_TIF RP 23 CNS B_UASWEB1
     </footer>
-</body>
-</html>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
 
 <!-- Fade-in on scroll JS -->
 <script>
@@ -922,33 +1283,35 @@ document.addEventListener("DOMContentLoaded", function() {
     var navKategori = document.getElementById('nav-kategori');
     var kategoriSection = document.getElementById('kategori');
 
-    navHome.addEventListener('click', function(e) {
-        e.preventDefault();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        navHome.classList.add('active');
-        navKategori.classList.remove('active');
-    });
-
-    navKategori.addEventListener('click', function(e) {
-        e.preventDefault();
-        if (kategoriSection) {
-            kategoriSection.scrollIntoView({ behavior: 'smooth' });
-        }
-        navHome.classList.remove('active');
-        navKategori.classList.add('active');
-    });
-
-    // Auto update active state on scroll
-    window.addEventListener('scroll', function() {
-        var kategoriTop = kategoriSection.getBoundingClientRect().top + window.scrollY - 80;
-        if (window.scrollY >= kategoriTop - 10) {
-            navHome.classList.remove('active');
-            navKategori.classList.add('active');
-        } else {
+    if (navHome) {
+        navHome.addEventListener('click', function(e) {
+            e.preventDefault();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
             navHome.classList.add('active');
-            navKategori.classList.remove('active');
-        }
-    });
+            if (navKategori) navKategori.classList.remove('active');
+        });
+    }
+
+    if (navKategori && kategoriSection) {
+        navKategori.addEventListener('click', function(e) {
+            e.preventDefault();
+            kategoriSection.scrollIntoView({ behavior: 'smooth' });
+            if (navHome) navHome.classList.remove('active');
+            navKategori.classList.add('active');
+        });
+
+        // Auto update active state on scroll
+        window.addEventListener('scroll', function() {
+            var kategoriTop = kategoriSection.getBoundingClientRect().top + window.scrollY - 80;
+            if (window.scrollY >= kategoriTop - 10) {
+                if (navHome) navHome.classList.remove('active');
+                navKategori.classList.add('active');
+            } else {
+                if (navHome) navHome.classList.add('active');
+                navKategori.classList.remove('active');
+            }
+        });
+    }
 
     // Navbar hamburger menu
     var menuToggle = document.getElementById('menuToggle');
@@ -969,10 +1332,22 @@ document.addEventListener("DOMContentLoaded", function() {
             navbarMenu.classList.remove('show');
         }
     });
+
+    var profileBtn = document.getElementById('profileMenuBtn');
+    var profileDropdown = document.getElementById('profileDropdown');
+    if (profileBtn && profileDropdown) {
+        profileBtn.addEventListener('click', function(ev) {
+            ev.stopPropagation();
+            profileDropdown.classList.toggle('show');
+        });
+        document.addEventListener('click', function(ev) {
+            if (!profileDropdown.contains(ev.target) && ev.target !== profileBtn) {
+                profileDropdown.classList.remove('show');
+            }
+        });
+    }
 });
 </script>
-<?php
-// Setelah login sukses
-$redirect = isset($_GET['redirect']) ? $_GET['redirect'] : 'index.php';
-header("Location: $redirect");
-exit;
+
+</body>
+</html>
