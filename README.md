@@ -1,5 +1,10 @@
 # UAS_Pemrograman-Web-1
 
+## Link Hosting
+
+Berikut Link Hosting Project:
+https://rizkika.free.nf/
+
 ## Video Demo Project
 
 Berikut Link Google Drive Video Demo Project:
