@@ -106,3 +106,16 @@ Lalu ada juga halaman edit profil yang bisa digunakan untuk mengubah nama dan me
 </div>
 
 ---
+
+### 10. Dashboard Admin
+Menampilkan halaman dashboard admin yang didalamnya dapat mengelola produk, kategori, melihat pesanan, melihat data user yang telah login.
+
+<div align="center">
+  <img src="Screenshot/dashboard.png" width="500">
+</div>
+
+<div align="center">
+  <img src="Screenshot/dashboard2..png" width="500">
+</div>
+
+---
