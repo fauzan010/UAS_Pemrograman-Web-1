@@ -147,6 +147,7 @@ $date_fmt = date('d M Y H:i', strtotime($order['tanggal']));
     </div>
 
     <div class="cta-row">
+        <a class="btn-pill btn-soft" href="export_payment_pdf.php?order_id=<?= intval($order['id']) ?>" target="_blank" rel="noopener">Unduh PDF</a>
         <a class="btn-pill btn-primary" href="profile.php">Lihat Pesanan Saya</a>
         <a class="btn-pill btn-soft" href="index.php">Kembali ke Marketplace</a>
     </div>

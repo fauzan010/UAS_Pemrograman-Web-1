@@ -87,7 +87,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     linear-gradient(120deg, #e0eafc 0%, #cfdef3 100%);
         min-height: 100vh;
         padding-top: 90px;
-        padding-bottom: 120px;
+        padding-bottom: 32px;
+        display: flex;
+        flex-direction: column;
     }
     .navbar {
         display: flex;
@@ -184,6 +186,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         max-width: 1080px;
         margin: 32px auto;
         padding: 0 18px;
+        flex: 1;
+        width: 100%;
     }
     .detail-container {
         background: #fff;
@@ -474,6 +478,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .btn-beli { font-size: 1rem; padding: 12px; }
         .info-grid { grid-template-columns: 1fr; }
     }
+    .footer {
+        text-align: center;
+        padding: 18px 0;
+        background: #f4f6f8;
+        color: #888;
+        font-size: 15px;
+        width: 100vw;
+        margin-left: calc(50% - 50vw);
+        margin-right: calc(50% - 50vw);
+        margin-top: auto;
+        padding-left: 16px;
+        padding-right: 16px;
+    }
     </style>
 </head>
 <body>
@@ -549,8 +566,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </form>
         </div>
     </div>
-</div>
-
+    
 <!-- Modal Login/Register -->
 <div class="modal-login" id="modalLogin">
     <div class="modal-login-content">
@@ -563,6 +579,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <button class="btn btn-cancel" onclick="closeModalLogin()">Batal</button>
     </div>
 </div>
+
+<footer class="footer">
+    @Copyright by 23552011029_Fauzan Rizkika Kurnia_TIF RP 23 CNS B_UASWEB1
+</footer>
 
 <script>
 function isLoggedIn() {
@@ -607,12 +627,8 @@ document.addEventListener("DOMContentLoaded", function() {
 
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-        crossorigin="anonymous"></script>
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+    crossorigin="anonymous"></script>
 
-<!-- Footer -->
-<footer class="footer" style="text-align:center; padding:18px 0; background:#f4f6f8; color:#888; font-size:15px; position:fixed; left:0; right:0; bottom:0;">
-    @Copyright by 23552011029_Fauzan Rizkika Kurnia_TIF RP 23 CNS B_UASWEB1
-</footer>
 </body>
 </html>

@@ -58,6 +58,8 @@ foreach ($cart as $item) {
                     linear-gradient(120deg, #e0eafc 0%, #cfdef3 100%);
         min-height: 100vh;
         padding-top: 88px;
+        display: flex;
+        flex-direction: column;
     }
     .navbar {
         display: flex;
@@ -186,8 +188,10 @@ foreach ($cart as $item) {
     .profile-dropdown a.logout:hover { background: #fff1f2; }
     .page-shell {
         max-width: 1080px;
-        margin: 24px auto 110px auto;
+        margin: 24px auto 40px auto;
         padding: 0 6vw;
+        flex: 1;
+        width: 100%;
     }
     .cart-hero {
         background: linear-gradient(135deg, #2d82d8, #46c2ff);
@@ -344,6 +348,15 @@ foreach ($cart as $item) {
         .navbar ul li.nav-right { margin-left: 0; }
         .page-shell { margin-top: 10px; }
     }
+    .footer {
+        text-align: center;
+        padding: 18px 0;
+        background: #f4f6f8;
+        color: #888;
+        font-size: 15px;
+        width: 100%;
+        margin-top: auto;
+    }
     </style>
 </head>
 <body>
@@ -429,10 +442,14 @@ foreach ($cart as $item) {
     </div>
 </div>
 
+<footer class="footer">
+    @Copyright by 23552011029_Fauzan Rizkika Kurnia_TIF RP 23 CNS B_UASWEB1
+    </footer>
+
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-        crossorigin="anonymous"></script>
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+    crossorigin="anonymous"></script>
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -468,10 +485,5 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 });
 </script>
-
-<footer class="footer" style="text-align:center; padding:18px 0; background:#f4f6f8; color:#030000; font-size:15px; margin-top:40px;">
-    @Copyright by 23552011029_Fauzan Rizkika Kurnia_TIF RP 23 CNS B_UASWEB1
-</footer>
-
 </body>
 </html>

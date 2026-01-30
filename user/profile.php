@@ -446,8 +446,14 @@ if ($initial === '') { $initial = 'U'; }
 
     <div class="card-base" style="margin-top:14px;">
         <div class="card-head">
-            <div class="eyebrow">Pemesanan</div>
-            <h3>Riwayat Pesanan Saya</h3>
+            <div>
+                <div class="eyebrow">Pemesanan</div>
+                <h3>Riwayat Pesanan Saya</h3>
+            </div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+                <a class="cta-btn primary" href="export_orders.php?format=pdf" target="_blank" rel="noopener">Export PDF</a>
+                <a class="cta-btn soft" href="export_orders.php?format=excel" target="_blank" rel="noopener">Export Excel</a>
+            </div>
         </div>
         <p class="muted">Lihat status pesanan yang pernah kamu buat.</p>
         <div class="table-wrapper">
