@@ -9,8 +9,6 @@ Berikut Link Google Drive Video Demo Project:
 
 Berikut beberapa tampilan (screenshot) dari aplikasi WorldBike yang telah saya kembangkan, mulai dari halaman awal, fitur utama pengguna, hingga halaman admin.
 
----
-
 ### 1. Register
 Halaman pendaftaran akun untuk pengguna baru dengan mengisi data agar dapat mengakses seluruh fitur website WorldBike.
 
