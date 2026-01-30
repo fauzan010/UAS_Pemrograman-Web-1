@@ -8,7 +8,7 @@ https://rizkika.free.nf/
 ## Video Demo Project
 
 Berikut Link Google Drive Video Demo Project:
-
+https://drive.google.com/drive/folders/11bP-oYfAFoIRHYntSqsyy2ljlfBfPdn5
 
 ## Screenshots Project
 
