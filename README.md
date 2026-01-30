@@ -2,6 +2,8 @@
 
 ## Video Demo Project
 
+Berikut Link Google Drive Video Demo Project:
+
 
 ## Screenshots Project
 
@@ -116,6 +118,50 @@ Menampilkan halaman dashboard admin yang didalamnya dapat mengelola produk, kate
 
 <div align="center">
   <img src="Screenshot/dashboard2..png" width="500">
+</div>
+
+---
+
+### 11. Produk dan Tambah Produk
+Menampilkan halaman produk yang telah dibuat mau itu kategori sepeda atau aksesoris. Dan juga halaman tambah produk untuk menambahkan produk yang akan tampil juga di marketplace.
+
+<div align="center">
+  <img src="Screenshot/produk.png" width="500">
+</div>
+
+<div align="center">
+  <img src="Screenshot/tambah_produk.png" width="500">
+</div>
+
+---
+
+### 12. Kategori dan Tambah Kategori
+Menampilkan halaman kategori yang sudah dibuat dan juga halaman tambah kategori.
+
+<div align="center">
+  <img src="Screenshot/kategori.png" width="500">
+</div>
+
+<div align="center">
+  <img src="Screenshot/tambah_kategori.png" width="500">
+</div>
+
+---
+
+### 13. Pemesanan
+Menampilkan halaman yang berisi data pemesanan dari setiap user yang melakukan pesanan.
+
+<div align="center">
+  <img src="Screenshot/pemesanan.png" width="500">
+</div>
+
+---
+
+### 14. Pengguna
+Menampilkan halaman yang beiri pengguna yang telah register dan login di website ini.
+
+<div align="center">
+  <img src="Screenshot/pengguna.png" width="500">
 </div>
 
 ---
