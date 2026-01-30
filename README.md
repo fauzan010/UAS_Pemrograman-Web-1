@@ -13,7 +13,7 @@ Berikut beberapa tampilan (screenshot) dari aplikasi WorldBike yang telah saya k
 Halaman pendaftaran akun untuk pengguna baru dengan mengisi data agar dapat menggunakan seluruh fitur aplikasi WorldBike.
 
 <div align="center">
-  <img src="Screenshot/register.png" width="200">
+  <img src="Screenshot/register.png" width="300">
 </div>
 
 ---
@@ -22,7 +22,7 @@ Halaman pendaftaran akun untuk pengguna baru dengan mengisi data agar dapat meng
 Halaman untuk masuk ke aplikasi menggunakan akun yang sudah terdaftar agar pengguna dapat mengakses fitur WorldBike.
 
 <div align="center">
-  <img src="Screenshot/login.png" width="200">
+  <img src="Screenshot/login.png" width="300">
 </div>
 
 ---
